@@ -1,0 +1,35 @@
+version: '3'
+
+services:
+
+  proxy:
+    image: nginx:latest
+    # Port forward router 8000->80 8443->443
+    # This will allow you to run docker rootless
+    ports:
+      - 8000:80
+      - 8443:443
+    restart: always
+    volumes:
+      - ./nginx/conf/:/etc/nginx/conf.d/:ro
+      - ./certbot/www/:/var/www/certbot/:ro
+      - ./certbot/conf/:/etc/letsencrypt/:ro
+
+  certbot:
+    image: certbot/certbot:latest
+    volumes:
+      - ./certbot/www/:/var/www/certbot/:rw
+      - ./certbot/conf/:/etc/letsencrypt/:rw
+
+  # These are your services
+  superservice:
+    image: nginx:latest
+    ports:
+      - 80
+    restart: always
+
+  helloworld:
+    image: testcontainers/helloworld
+    ports:
+      - 8080
+      - 8081
